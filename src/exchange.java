@@ -21,11 +21,9 @@ public class exchange {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		
 		loadFileData(INPUT_FILE);
 		Thread master = new Thread(new Master(communication), "Master");
 		master.start();
-		
 	}
 	
 	/**
@@ -33,7 +31,6 @@ public class exchange {
 	 * @throws IOException
 	 */
 	public static void loadFileData(String fname) throws IOException {
-		
 		Scanner data = null;
         try {
         	data = new Scanner(new File(fname));
@@ -80,15 +77,12 @@ class Master implements Runnable {
 	 */
 	@Override
 	public synchronized void run() {
-		
 		startupDisplay();
-		
 		try {
 			initializeSlaveProcess();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	/**
@@ -107,7 +101,6 @@ class Master implements Runnable {
 	 * @throws InterruptedException
 	 */
 	public synchronized void initializeSlaveProcess() throws InterruptedException {
-		
 		for (Map.Entry<String, String []> communicationObj : communication.entrySet()) {
 			Slave s = new Slave(communicationObj.getKey(), communicationObj.getValue());
 			Slave.slavelist.put(communicationObj.getKey(), s);
@@ -122,7 +115,6 @@ class Master implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		
 	}
 
 	/**
