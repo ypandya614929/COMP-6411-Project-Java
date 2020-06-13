@@ -135,7 +135,7 @@ class Master implements Runnable {
 	/**
 	 * @throws InterruptedException
 	 */
-	public void goodByeMaster() throws InterruptedException {
+	public synchronized void goodByeMaster() throws InterruptedException {
 		System.out.println("\nMaster has received no replies for " + (exchange.MASTER_WAIT_TIME / 1000) + " seconds, ending...");	
 	}
 	
