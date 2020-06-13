@@ -77,9 +77,9 @@ class Master implements Runnable {
 	 */
 	@Override
 	public synchronized void run() {
-		startupDisplay();
+		this.startupDisplay();
 		try {
-			initializeSlaveProcess();
+			this.initializeSlaveProcess();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
