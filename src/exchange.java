@@ -57,15 +57,10 @@ public class exchange {
             	}
             }
         }
-        
 	}
 	
 }
 
-/**
- * @author ypandya
- *
- */
 class Master implements Runnable {
 	
 	static LinkedHashMap<String, String []> communication = new LinkedHashMap<>();
@@ -105,7 +100,7 @@ class Master implements Runnable {
 			System.out.println(communicationObj.getKey() + ": " + "[" + String.join(",", communicationObj.getValue()) + "]");
 		}
 		System.out.println();
-		
+
 	}
 	
 	/**
@@ -115,15 +110,15 @@ class Master implements Runnable {
 		
 		for (Map.Entry<String, String []> communicationObj : communication.entrySet()) {
 			Slave s = new Slave(communicationObj.getKey(), communicationObj.getValue());
-			Slave.processList.put(communicationObj.getKey(), s);
+			Slave.slavelist.put(communicationObj.getKey(), s);
 		}
 		
 		for (Map.Entry<String, String []> communicationObj : communication.entrySet()) {
 			try {
-				Thread slave = new Thread(Slave.processList.get(communicationObj.getKey()));
+				Thread slave = new Thread(Slave.slavelist.get(communicationObj.getKey()));
 				slave.start();
 				Slave.slavethreadcount++;
-			}catch(Exception e) {
+			} catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -146,13 +141,9 @@ class Master implements Runnable {
 	
 }
 
-/**
- * @author ypandya
- *
- */
 class Slave implements Runnable {
 	
-	public static LinkedHashMap<String,Slave> processList = new LinkedHashMap<String,Slave>();
+	public static LinkedHashMap<String,Slave> slavelist = new LinkedHashMap<String,Slave>();
 	public String sender;
 	public String[] receiverList;
 	Master master = new Master();
@@ -207,7 +198,7 @@ class Slave implements Runnable {
 		Message msg = this.createMessage(user, "intro");
 		master.printSlaveProcessMessageData(msg);
 		Thread.sleep(new Random().nextInt(100));
-		Slave p = processList.get(user);
+		Slave p = slavelist.get(user);
 		p.generatereplyMessage(this.sender);
 	}
 	
@@ -229,7 +220,7 @@ class Slave implements Runnable {
 		msg.setMessage(message);
 		msg.setReceiver(user);
 		msg.setSender(this.sender);
-		msg.setTimestamp(System.currentTimeMillis());
+		msg.setTimestamp(System.currentTimeMillis()/1000);
 		return msg;
 	}
 	
@@ -239,5 +230,79 @@ class Slave implements Runnable {
 	public void goodByeSlave() {
 		System.out.println("\nProcess " + this.sender + " has received no calls for " + (exchange.PROCESS_WAIT_TIME / 1000) + " seconds, ending...");
 	}
+	
+}
 
+class Message {
+
+	public String sender;
+	public String receiver;
+	public String message;
+	public Long timestamp;
+
+	/**
+	 * @return the sender
+	 */
+	public String getSender() {
+		return sender;
+	}
+
+	/**
+	 * @param sender the sender to set
+	 */
+	public void setSender(String sender) {
+		this.sender = sender;
+	}
+
+	/**
+	 * @return the receiver
+	 */
+	public String getReceiver() {
+		return receiver;
+	}
+
+	/**
+	 * @param receiver the receiver to set
+	 */
+	public void setReceiver(String receiver) {
+		this.receiver = receiver;
+	}
+
+	/**
+	 * @return the message
+	 */
+	public String getMessage() {
+		return message;
+	}
+
+	/**
+	 * @param message the message to set
+	 */
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	/**
+	 * @return the timestamp
+	 */
+	public Long getTimestamp() {
+		return timestamp;
+	}
+
+	/**
+	 * @param timestamp the timestamp to set
+	 */
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	/**
+	 *
+	 */
+	@Override
+	public String toString() {
+		String returnmsg = getReceiver() + " received " + getMessage() + " message from " + getSender() + " [" + getTimestamp() + "]";
+		return returnmsg;
+	}
+		
 }

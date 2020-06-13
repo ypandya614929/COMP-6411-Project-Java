@@ -1,0 +1,5 @@
+{john, [jill,joe,bob]}.
+{jill, [bob,jill,jill,bob,jill]}.
+{sue, [jill,jill,jill,bob,jill]}.
+{bob, [john]}.
+{joe, [sue]}.
