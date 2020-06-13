@@ -65,6 +65,9 @@ class Message {
 		this.timestamp = timestamp;
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public String toString() {
 		String returnmsg = getReceiver() + " received " + getMessage() + " message from " + getSender() + " [" + getTimestamp() + "]";

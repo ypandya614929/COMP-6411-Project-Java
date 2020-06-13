@@ -89,7 +89,7 @@ class Master implements Runnable {
 		startupDisplay();
 		
 		try {
-			initializeSubProcess();
+			initializeSlaveProcess();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -111,7 +111,7 @@ class Master implements Runnable {
 	/**
 	 * @throws InterruptedException
 	 */
-	public synchronized void initializeSubProcess() throws InterruptedException {
+	public synchronized void initializeSlaveProcess() throws InterruptedException {
 		
 		for (Map.Entry<String, String []> communicationObj : communication.entrySet()) {
 			Slave s = new Slave(communicationObj.getKey(), communicationObj.getValue());
@@ -133,7 +133,7 @@ class Master implements Runnable {
 	/**
 	 * @param msg
 	 */
-	public void printProcessMessageData(Message msg) {
+	public void printSlaveProcessMessageData(Message msg) {
 		System.out.println(msg);
 	}
 	
@@ -175,10 +175,11 @@ class Slave implements Runnable {
 		try {
 			this.initiateCommunication();
 			wait(exchange.PROCESS_WAIT_TIME);
-			this.goodByeProcess();
+			this.goodByeSlave();
 			Master.counts++;
 			if (Master.counts == slavethreadcount) {
 				synchronized(master) {
+					Master.counts = 0;
 					master.wait(exchange.MASTER_WAIT_TIME);
 					master.goodByeMaster();
 			    }
@@ -204,7 +205,7 @@ class Slave implements Runnable {
 	 */
 	public void generateintroMessage(String user) throws InterruptedException {
 		Message msg = this.createMessage(user, "intro");
-		master.printProcessMessageData(msg);
+		master.printSlaveProcessMessageData(msg);
 		Thread.sleep(new Random().nextInt(100));
 		Slave p = processList.get(user);
 		p.generatereplyMessage(this.sender);
@@ -215,7 +216,7 @@ class Slave implements Runnable {
 	 */
 	public void generatereplyMessage(String user) {
 		Message msg = this.createMessage(user, "reply");
-		master.printProcessMessageData(msg);
+		master.printSlaveProcessMessageData(msg);
 	}
 	
 	/**
@@ -235,7 +236,7 @@ class Slave implements Runnable {
 	/**
 	 * 
 	 */
-	public void goodByeProcess() {
+	public void goodByeSlave() {
 		System.out.println("\nProcess " + this.sender + " has received no calls for " + (exchange.PROCESS_WAIT_TIME / 1000) + " seconds, ending...");
 	}
 
