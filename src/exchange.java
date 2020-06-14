@@ -163,7 +163,7 @@ class Slave implements Runnable {
 			if (Master.counts == slavethreadcount) {
 				synchronized(master) {
 					Master.counts = 0;
-					master.wait(exchange.MASTER_WAIT_TIME);
+					master.wait(exchange.MASTER_WAIT_TIME-exchange.PROCESS_WAIT_TIME);
 					master.goodByeMaster();
 			    }
 			}
