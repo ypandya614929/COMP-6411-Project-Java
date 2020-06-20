@@ -1,3 +1,7 @@
+//Ref
+//https://www.geeksforgeeks.org/multithreading-in-java/
+//https://www.geeksforgeeks.org/synchronized-in-java/
+//https://mincong.io/2018/07/01/method-execution-in-multithreading/
 import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Scanner;
@@ -17,17 +21,23 @@ public class exchange {
 	static LinkedHashMap<String, String []> communication = new LinkedHashMap<>();
 	
 	/**
+	 * Java main method to run the program
 	 * @param args
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		loadFileData(INPUT_FILE);
-		Thread master = new Thread(new Master(communication), "Master");
-		master.start();
+		try {
+			loadFileData(INPUT_FILE);
+			Thread master = new Thread(new Master(communication));
+			master.start();
+		} catch (Exception e) {
+			System.out.println("Something went wrong, please check file path");
+		}
 	}
 	
 	/**
-	 * @param filename
+	 * This method is used to read file data and load into LinkedHashMap
+	 * @param filename name of the file
 	 * @throws IOException
 	 */
 	public static void loadFileData(String fname) throws IOException {
@@ -66,14 +76,15 @@ class Master implements Runnable {
 	Master(){};
 	
 	/**
-	 * @param communication
+	 * Parameterized constructor
+	 * @param communication LinkedHashMap object
 	 */
 	Master(LinkedHashMap<String, String []> communication){
 		Master.communication = communication;
 	}
 	
 	/**
-	 *
+	 * This method is used to run the master thread
 	 */
 	@Override
 	public synchronized void run() {
@@ -86,7 +97,7 @@ class Master implements Runnable {
 	}
 	
 	/**
-	 * 
+	 * This method is used to display calling list in the master thread
 	 */
 	public void startupDisplay() {
 		System.out.println("** Calls to be made **");
@@ -98,6 +109,8 @@ class Master implements Runnable {
 	}
 	
 	/**
+	 * This method is used to start the slave threads to run and communicate
+	 * in between the slaves
 	 * @throws InterruptedException
 	 */
 	public synchronized void initializeSlaveProcess() throws InterruptedException {
@@ -118,13 +131,15 @@ class Master implements Runnable {
 	}
 
 	/**
-	 * @param msg
+	 * This message is used to display message data on master thread
+	 * @param msg Message object
 	 */
 	public void printSlaveProcessMessageData(Message msg) {
 		System.out.println(msg);
 	}
 	
 	/**
+	 * This method is used to display goodbye message on master thread
 	 * @throws InterruptedException
 	 */
 	public synchronized void goodByeMaster() throws InterruptedException {
@@ -142,8 +157,9 @@ class Slave implements Runnable {
 	public static int slavethreadcount = 0;
 	
 	/**
-	 * @param sender
-	 * @param receiverList
+	 * Parameterized Constructor
+	 * @param sender name of sender
+	 * @param receiverList string list contains the receiver info
 	 */
 	Slave(String sender, String[] receiverList){
 		this.sender = sender;
@@ -151,11 +167,12 @@ class Slave implements Runnable {
 	}
 	
 	/**
-	 *
+	 * This method is used to run the slave threads
 	 */
 	@Override
 	public synchronized void run() {
 		try {
+			Thread.sleep(new Random().nextInt(100));
 			this.initiateCommunication();
 			wait(exchange.PROCESS_WAIT_TIME);
 			this.goodByeSlave();
@@ -173,51 +190,57 @@ class Slave implements Runnable {
 	}
 	
 	/**
+	 * This method is used to communicate between slave threads
 	 * @throws InterruptedException
 	 */
 	public void initiateCommunication() throws InterruptedException {
 		for (String receiver : this.receiverList) {
-			Thread.sleep(new Random().nextInt(100));
 			this.generateintroMessage(receiver);
 		}
 	}
 	
 	/**
-	 * @param user
+	 * This method is used to generate message from sender and receiver
+	 * @param user receiver name
 	 * @throws InterruptedException
 	 */
 	public void generateintroMessage(String user) throws InterruptedException {
-		Message msg = this.createMessage(user, "intro");
+		long timestamp = System.nanoTime()/1000;
+		Message msg = this.createMessage(user, "intro", timestamp);
 		master.printSlaveProcessMessageData(msg);
 		Thread.sleep(new Random().nextInt(100));
 		Slave p = slavelist.get(user);
-		p.generatereplyMessage(this.sender);
+		p.generatereplyMessage(this.sender, timestamp);
 	}
 	
 	/**
-	 * @param user
+	 * This method is used to generate reply message
+	 * @param user receiver name
+	 * @param timestamp timestamp of the message
 	 */
-	public void generatereplyMessage(String user) {
-		Message msg = this.createMessage(user, "reply");
+	public void generatereplyMessage(String user, long timestamp) {
+		Message msg = this.createMessage(user, "reply", timestamp);
 		master.printSlaveProcessMessageData(msg);
 	}
 	
 	/**
-	 * @param user
-	 * @param message
-	 * @return
+	 * This method is used to create message object
+	 * @param user receiver name
+	 * @param message message text either intro or reply
+	 * @param timestamp timestamp of the message
+	 * @return message object
 	 */
-	public Message createMessage(String user, String message) {
+	public Message createMessage(String user, String message, long timestamp) {
 		Message msg = new Message();
 		msg.setMessage(message);
 		msg.setReceiver(user);
 		msg.setSender(this.sender);
-		msg.setTimestamp(System.currentTimeMillis()/1000);
+		msg.setTimestamp(timestamp);
 		return msg;
 	}
 	
 	/**
-	 * 
+	 * This method is used to display goodbye for slave thread
 	 */
 	public void goodByeSlave() {
 		System.out.println("\nProcess " + this.sender + " has received no calls for " + (exchange.PROCESS_WAIT_TIME / 1000) + " seconds, ending...");
@@ -289,7 +312,8 @@ class Message {
 	}
 
 	/**
-	 *
+	 * This method is used to generate display message statement based on
+	 * message type sender and receiver
 	 */
 	@Override
 	public String toString() {
